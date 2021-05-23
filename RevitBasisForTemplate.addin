@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command RevitBasisForTemplate</Text>
+    <Description>Some description for RevitBasisForTemplate</Description>
+    <Assembly>RevitBasisForTemplate.dll</Assembly>
+    <FullClassName>RevitBasisForTemplate.Command</FullClassName>
+    <ClientId>7324c46a-ddcf-4c26-8ea6-b94cc9ae2992</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application RevitBasisForTemplate</Name>
+    <Assembly>RevitBasisForTemplate.dll</Assembly>
+    <FullClassName>RevitBasisForTemplate.App</FullClassName>
+    <ClientId>48b85a7d-dfd4-49ae-b190-63ea9b910153</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
