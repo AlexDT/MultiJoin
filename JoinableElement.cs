@@ -12,15 +12,21 @@ namespace MultiJoin
 {
     internal class JoinableElement
     {
+        #region public properties
         public static List<Category> uniqueCategories = new List<Category>();
-
-        private static int counter;
+        public static int counter;
+        #endregion
 
         #region Internal properties
-        public ElementId elementId;
-        internal Element element;
-        internal string name;
-        internal Category category;
+        internal ElementId elementId { get; }
+        internal Element element { get; }
+        internal string name { get; }
+        internal Category category { get; }
+        internal BoundingBoxXYZ boundingBox { get; }
+        internal XYZ boundingBoxMin { get; }
+        internal XYZ boundingBoxMax { get; }
+        internal Outline boundingBoxOutline { get; }
+        internal BoundingBoxIntersectsFilter boundingBoxFilter {get;}
         internal bool canBeJoined { get; set; }
         #endregion
 
@@ -30,7 +36,11 @@ namespace MultiJoin
             element = doc.GetElement(elementId);
             name = element.Name;
             category = element.Category;
-            canBeJoined = true;
+            canBeJoined = false;
+            boundingBox = element.get_BoundingBox(doc.ActiveView);
+            XYZ bbMin = boundingBox.Min;
+            XYZ bbMax = boundingBox.Max;
+            boundingBoxOutline = new Outline(boundingBoxMin, boundingBoxMax);
 
             addCategory(element.Category);
             counter += 1;
@@ -38,24 +48,9 @@ namespace MultiJoin
             Debug.WriteLine(name + ": " + elementId + " - " + category.Name);
 
         }
-        public JoinableElement(Element ele)
-        {
-            element = ele;
-            elementId = element.Id;
-            name = element.Name;
-            category = element.Category;
-            canBeJoined = true;
-
-            addCategory(element.Category);
-            counter += 1;
-
-            Debug.WriteLine(name, elementId, category.Name);
-
-        }
-
         private void addCategory(Category cat)
         {
-            if (!uniqueCategories.Any(c => c.Name == cat.Name))
+            if (!uniqueCategories.Exists(c => c.Id == cat.Id))
             {
                 uniqueCategories.Add(cat);
             }

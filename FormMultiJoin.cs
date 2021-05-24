@@ -1,4 +1,8 @@
 ﻿#region Namespaces
+using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using RHDRevitLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,13 +13,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using static MultiJoin.Command;
-
-using Form = System.Windows.Forms.Form;
 using Application = Autodesk.Revit.ApplicationServices.Application;
+using Form = System.Windows.Forms.Form;
 using View = Autodesk.Revit.DB.View;
 #endregion
 
@@ -28,10 +28,10 @@ namespace MultiJoin
         {
             InitializeComponent();
 
-            List<Category> selectedElementCategories = new List<Category>();
+            //List<Category> selectedElementCategories = new List<Category>();
             List<JoinableElement> selectedElements = new List<JoinableElement>();
             List<Category> selectedCategories = new List<Category>();
-            List<Element> selectionToJoin = new List<Element>();
+            //List<Element> selectionToJoin = new List<Element>();
 
             #region Present unique category list to user
             //foreach (ElementId e in selectedElementIds.ToList())
@@ -41,7 +41,7 @@ namespace MultiJoin
             //    selectedElementCategories.Add(cat);
             //}
 
-            foreach (ElementId eId in selectedElementIds)
+            foreach (ElementId eId in selectedElementIds)               
             {
                 selectedElements.Add(new JoinableElement(eId));
             }
@@ -52,21 +52,12 @@ namespace MultiJoin
             clbCategories.DisplayMember = "Name";
             #endregion
 
-            #region Select element with based on category
+            #region Select elements based on category
             foreach (Category itemChecked in clbCategories.CheckedItems)
             {
                 selectedCategories.Add(itemChecked);
             }
 
-            foreach (ElementId id in selectedElementIds)
-            {
-                Element e = doc.GetElement(id);
-
-                if (selectedCategories.Contains(e.Category))
-                {
-                    selectionToJoin.Add(e);
-                }
-            }
             #endregion
 
             /* -----
@@ -77,43 +68,35 @@ namespace MultiJoin
             * 4. Try catch any other problems and report amount that couldnt be joined?
             */
 
-            //foreach (JoinableElement e in selectedElements)
-            //{
-            //    foreach (JoinableElement f in selectedElements)
-            //    {
-            //        if (e.Id != f.Id && !JoinGeometryUtils.AreElementsJoined(doc, e, f))
-            //        {
-            //            BoundingBoxXYZ bb = e.get_BoundingBox(doc.ActiveView);
-            //            XYZ bbMin = bb.Min;
-            //            XYZ bbMax = bb.Max;
-
-            //            //BoundingBoxXYZ fBB= f.get_BoundingBox(doc.ActiveView);
-            //            Outline outline = new Outline(bbMin, bbMax);
-            //            BoundingBoxIntersectsFilter filterBB = new BoundingBoxIntersectsFilter(outline);
+            foreach (JoinableElement e in selectedElements)
+            {
+                foreach (JoinableElement f in selectedElements)
+                {
+                    if (e.elementId != f.elementId && !JoinGeometryUtils.AreElementsJoined(doc, e.element, f.element))
+                    {
+                        //get only the instance that intersect the current line of the path
+                        foreach (JoinableElement e in selectedElements)
+                        {
+                            selectedElements;
+                        }
 
 
-            //            // get only the instance that intersect the current line of the path
-            //            //foreach (Element ele in selectedElements.WherePasses(filterBB))
-            //            //{
-            //            //    selectedElements.Remove(e);
-            //            //}
-
-
-            //        }
-            //    }
-            //}
+                    }
+                }
+            }
 
         }
 
         private void btn_OK_Click(object sender, EventArgs e)
         {
 
-
             using (Transaction tx = new Transaction(doc, "Joined multiple elements"))
             {
 
-            }
+                tx.Start();
 
+                tx.Commit();
+            }
 
         }
 
