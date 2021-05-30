@@ -10,9 +10,9 @@ using static MultiJoin.Command;
 
 namespace MultiJoin
 {
-    internal class JoinableElement
+    public class JoinableElement
     {
-        #region public properties
+        #region public static properties
         public static List<Category> uniqueCategories = new List<Category>();
         public static int counter;
         #endregion
@@ -26,8 +26,10 @@ namespace MultiJoin
         internal XYZ boundingBoxMin { get; }
         internal XYZ boundingBoxMax { get; }
         internal Outline boundingBoxOutline { get; }
-        internal BoundingBoxIntersectsFilter boundingBoxFilter {get;}
+        internal BoundingBoxIntersectsFilter boundingBoxFilter { get; set; }
         internal bool canBeJoined { get; set; }
+        internal List<Element> canJoinWith { get; set; }
+        //internal FilteredElementCollector collector { get; set; }
         #endregion
 
         public JoinableElement(ElementId eId)
@@ -36,13 +38,16 @@ namespace MultiJoin
             element = doc.GetElement(elementId);
             name = element.Name;
             category = element.Category;
-            canBeJoined = false;
+            canBeJoined = true;
             boundingBox = element.get_BoundingBox(doc.ActiveView);
-            XYZ bbMin = boundingBox.Min;
-            XYZ bbMax = boundingBox.Max;
+            XYZ boundingBoxMin = boundingBox.Min;
+            XYZ boundingBoxMax = boundingBox.Max;
             boundingBoxOutline = new Outline(boundingBoxMin, boundingBoxMax);
+            boundingBoxFilter = new BoundingBoxIntersectsFilter(boundingBoxOutline, 100);
+            canJoinWith = new FilteredElementCollector(doc, doc.ActiveView.Id).WherePasses(boundingBoxFilter).ToList();
 
             addCategory(element.Category);
+            addJoinable(element);
             counter += 1;
 
             Debug.WriteLine(name + ": " + elementId + " - " + category.Name);
@@ -53,6 +58,13 @@ namespace MultiJoin
             if (!uniqueCategories.Exists(c => c.Id == cat.Id))
             {
                 uniqueCategories.Add(cat);
+            }
+        }
+        private void addJoinable(Element ele)
+        {
+            if (canBeJoined)
+            {
+                canJoinWith.Add(ele);
             }
         }
     }

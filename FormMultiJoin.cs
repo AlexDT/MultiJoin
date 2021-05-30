@@ -24,12 +24,12 @@ namespace MultiJoin
 {
     public partial class FormMultiJoin : Form
     {
+        internal List<JoinableElement> selectedElements = new List<JoinableElement>();
         public FormMultiJoin()
         {
             InitializeComponent();
 
             //List<Category> selectedElementCategories = new List<Category>();
-            List<JoinableElement> selectedElements = new List<JoinableElement>();
             List<Category> selectedCategories = new List<Category>();
             //List<Element> selectionToJoin = new List<Element>();
 
@@ -41,7 +41,7 @@ namespace MultiJoin
             //    selectedElementCategories.Add(cat);
             //}
 
-            foreach (ElementId eId in selectedElementIds)               
+            foreach (ElementId eId in selectedElementIds)
             {
                 selectedElements.Add(new JoinableElement(eId));
             }
@@ -61,40 +61,45 @@ namespace MultiJoin
             #endregion
 
             /* -----
-            * 1. Let the list loop over the elements (n!)
-            * 2. Check if already joined 
+            * v1. Let the list loop over the elements
+            * v2. Check if already joined 
             * 3. Check if boundingbox intersects
             * 3. Check if material matches
-            * 4. Try catch any other problems and report amount that couldnt be joined?
+            * 4. Try catch any other problems and report amount that couldn't be joined?
             */
-
-            foreach (JoinableElement e in selectedElements)
-            {
-                foreach (JoinableElement f in selectedElements)
-                {
-                    if (e.elementId != f.elementId && !JoinGeometryUtils.AreElementsJoined(doc, e.element, f.element))
-                    {
-                        //get only the instance that intersect the current line of the path
-                        foreach (JoinableElement e in selectedElements)
-                        {
-                            selectedElements;
-                        }
-
-
-                    }
-                }
-            }
-
         }
 
         private void btn_OK_Click(object sender, EventArgs e)
         {
-
             using (Transaction tx = new Transaction(doc, "Joined multiple elements"))
             {
-
                 tx.Start();
 
+                foreach (JoinableElement je in selectedElements)
+                {
+                    foreach (Element f in je.canJoinWith)
+                    {
+                        if (JoinableElement.uniqueCategories.Exists(c => c.Id == je.category.Id) &&
+                            JoinableElement.uniqueCategories.Exists(c => c.Id == f.Category.Id))
+                        {
+                            if (je.elementId != f.Id)
+                            {
+                                if (selectedElementIds.Contains(f.Id))
+                                {
+                                    if (!JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
+                                    {
+                                        try
+                                        {
+                                            JoinGeometryUtils.JoinGeometry(doc, f, je.element);
+
+                                        }
+                                        catch{ }                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
                 tx.Commit();
             }
 
