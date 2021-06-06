@@ -75,13 +75,15 @@ namespace MultiJoin
 
                 string resultMessage = "";
 
-                foreach (JoinableElement je in selectedElements.Where(ec => selectedCategories.Contains(ec.category)))
+                foreach (JoinableElement je in selectedElements/*.Where(ec => selectedCategories.Contains(ec.category))*/)
                 {
-                    foreach (Element f in je.canJoinWith)
+                    if (je.canBeJoined &&
+                        selectedCategories.Exists(c => c.Id == je.category.Id))
                     {
-                        if (!JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
+                        foreach (Element f in je.canJoinWith)
                         {
-                            if (je.canBeJoined)
+                            if (selectedCategories.Exists(c => c.Id == f.Category.Id) &&
+                                !JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
                             {
                                 try
                                 {
@@ -89,7 +91,7 @@ namespace MultiJoin
                                 }
                                 catch
                                 {
-                                    resultMessage += (je.elementId + " <=> " + f.Name + "\n");
+                                    resultMessage += (je.name + "." + " <=> " + f.Name + "." + "\n");
                                 }
                             }
                         }
@@ -100,6 +102,8 @@ namespace MultiJoin
                 TaskDialog.Show("Results", resultMessage);
 
                 tx.Commit();
+
+                ClearMemory();
                 Close();
             }
 
@@ -107,10 +111,13 @@ namespace MultiJoin
 
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
-            selectedElements.Clear();
-            selectedCategories.Clear();
             Close();
         }
+        private void ClearMemory()
+        {
+            selectedElements.Clear();
+            selectedCategories.Clear();
+            selectedElementIds.Clear();
+        }
     }
-
 }

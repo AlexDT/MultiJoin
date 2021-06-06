@@ -40,7 +40,7 @@ namespace MultiJoin
             XYZ boundingBoxMin = boundingBox.Min;
             XYZ boundingBoxMax = boundingBox.Max;
             boundingBoxOutline = new Outline(boundingBoxMin, boundingBoxMax);
-            boundingBoxFilter = new BoundingBoxIntersectsFilter(boundingBoxOutline, 100);
+            boundingBoxFilter = new BoundingBoxIntersectsFilter(boundingBoxOutline, 0);
             canJoinWith = new FilteredElementCollector(doc, doc.ActiveView.Id)
                 .WherePasses(boundingBoxFilter)
                 .Where(e => selectedElementIds.Contains(e.Id))
