@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="GroupUtil.cs" />
     <Compile Include="JoinableElement.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="FormMultiJoin.cs">

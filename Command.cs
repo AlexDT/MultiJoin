@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
+using static MultiJoin.GroupUtil;
+
 #endregion
 
 /* SUMMARY ADD-IN
@@ -48,7 +50,9 @@ namespace MultiJoin
         public static Application app;
         public static Document doc;
 
-        internal static ICollection<ElementId> selectedElementIds;
+        internal static List<ElementId> selectedElementIds;
+        public List<ElementId> groupedElements;
+
         public Result Execute(
           ExternalCommandData commandData,
           ref string message,
@@ -69,10 +73,27 @@ namespace MultiJoin
             app = uiapp.Application;
             doc = uidoc.Document;
 
-            selectedElementIds = uidoc.Selection.GetElementIds().ToList();
-
             using (var form = new FormMultiJoin())
             {
+                selectedElementIds = uidoc.Selection.GetElementIds().ToList();
+
+                //Finds all the grouped elements and adds 
+                foreach (ElementId id in selectedElementIds.Where(g => g.GetType() == typeof(Group)))
+                {
+                    groupedElements.AddRange(GetMembersRecursive(doc, (Group)doc.GetElement(id)));
+                }
+
+                //Removes Group from the list
+                foreach (ElementId gId in selectedElementIds.Where(g => g.GetType() == typeof(Group)))
+                {
+                    selectedElementIds.Remove(gId);
+                }
+
+                //if group exists add its elementids to the list.
+                if (groupedElements != null)
+                {
+                    selectedElementIds.AddRange(groupedElements);
+                }
 
                 if (selectedElementIds.Count < 2)
                 {

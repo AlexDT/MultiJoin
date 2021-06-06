@@ -91,7 +91,8 @@ namespace MultiJoin
                                 }
                                 catch
                                 {
-                                    resultMessage += (je.name + "." + " <=> " + f.Name + "." + "\n");
+                                    resultMessage += 
+                                        je.name + "(" + je.elementId + ") <=> " + f.Name + " (" + f.Id + ")\n";
                                 }
                             }
                         }
@@ -102,8 +103,6 @@ namespace MultiJoin
                 TaskDialog.Show("Results", resultMessage);
 
                 tx.Commit();
-
-                ClearMemory();
                 Close();
             }
 
@@ -112,12 +111,6 @@ namespace MultiJoin
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
             Close();
-        }
-        private void ClearMemory()
-        {
-            selectedElements.Clear();
-            selectedCategories.Clear();
-            selectedElementIds.Clear();
         }
     }
 }

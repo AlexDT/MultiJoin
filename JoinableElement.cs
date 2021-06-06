@@ -61,7 +61,9 @@ namespace MultiJoin
         }
         private void joinQualifier(Element ele)
         {
-            if (category.Name == "Structural Framing")
+            if (category.Name == "Structural Framing" ||
+                category.Name == "Walls" ||
+                category.Name == "Model Groups")
             {
                 canBeJoined = true;
             } else
