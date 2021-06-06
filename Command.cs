@@ -73,19 +73,47 @@ namespace MultiJoin
 
             using (var form = new FormMultiJoin())
             {
+
                 if (selectedElementIds.Count < 2)
                 {
                     TaskDialog.Show("Selection", "Please select 2 or more elements to be joined.");
 
                     return Result.Failed;
                 }
-                else
+                else if (selectedElementIds.Count > 10)
                 {
-                    form.ShowDialog();
+                    TaskDialog td = new TaskDialog("MultiJoin - " + selectedElementIds.Count + " items selected.")
+                    {
+                        MainContent = "You have selected more than 10 elements. Processing time may be long." +
+                        Environment.NewLine + Environment.NewLine +
+                        "Are you sure you want to proceed?"
+                    };
 
-                    // Cancel when user hits escape
-                    if (form.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                        form.Close();
+                    td.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "No", "Stop action and make a smaller selection.");
+                    td.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Yes", "Execute tool, I have time.");
+                    td.DefaultButton = TaskDialogResult.CommandLink1;
+                    td.AllowCancellation = true;
+
+                    switch (td.Show())
+                    {
+                        case TaskDialogResult.CommandLink1:
+
+                            return Result.Cancelled;
+
+                        case TaskDialogResult.CommandLink2:
+
+                            form.ShowDialog();
+
+                            // Cancel when user hits escape
+                            if (form.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                                form.Close();
+
+                            break;
+
+                        case 0:
+
+                            return Result.Failed;
+                    }
                 }
             }
 

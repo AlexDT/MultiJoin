@@ -17,6 +17,7 @@ using static MultiJoin.Command;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 using Form = System.Windows.Forms.Form;
 using View = Autodesk.Revit.DB.View;
+using System.Diagnostics;
 #endregion
 
 
@@ -25,88 +26,89 @@ namespace MultiJoin
     public partial class FormMultiJoin : Form
     {
         internal List<JoinableElement> selectedElements = new List<JoinableElement>();
+        internal List<Category> selectedCategories = new List<Category>();
+
         public FormMultiJoin()
         {
             InitializeComponent();
 
-            //List<Category> selectedElementCategories = new List<Category>();
-            List<Category> selectedCategories = new List<Category>();
-            //List<Element> selectionToJoin = new List<Element>();
-
             #region Present unique category list to user
-            //foreach (ElementId e in selectedElementIds.ToList())
-            //{
-            //    Category cat = doc.GetElement(e).Category;
-
-            //    selectedElementCategories.Add(cat);
-            //}
 
             foreach (ElementId eId in selectedElementIds)
             {
                 selectedElements.Add(new JoinableElement(eId));
+
+                Debug.WriteLine(selectedElements.Where(e => e.elementId == eId).First().canBeJoined.ToString());
             }
 
-            //clbCategories.DataSource = selectedElementCategories.GroupBy(x => x.Name).Select(g => g.First()).ToList();
             clbCategories.Sorted = true;
             clbCategories.DataSource = JoinableElement.uniqueCategories;
             clbCategories.DisplayMember = "Name";
-            #endregion
 
+            for (int i = 0; i < clbCategories.Items.Count; i++)
+            {
+                clbCategories.SetItemChecked(i, true);
+            }
+            #endregion
+        }
+
+        private void btn_OK_Click(object sender, EventArgs e)
+        {
             #region Select elements based on category
             foreach (Category itemChecked in clbCategories.CheckedItems)
             {
                 selectedCategories.Add(itemChecked);
             }
-
             #endregion
 
-            /* -----
-            * v1. Let the list loop over the elements
-            * v2. Check if already joined 
-            * 3. Check if boundingbox intersects
-            * 3. Check if material matches
-            * 4. Try catch any other problems and report amount that couldn't be joined?
-            */
-        }
-
-        private void btn_OK_Click(object sender, EventArgs e)
-        {
             using (Transaction tx = new Transaction(doc, "Joined multiple elements"))
             {
                 tx.Start();
 
-                foreach (JoinableElement je in selectedElements)
+                /* -----
+                * v1. Let the list loop over the elements
+                * v2. Check if already joined 
+                * 3. Check if boundingbox intersects
+                * 3. Check if material matches
+                * 4. Try catch any other problems and report amount that couldn't be joined?
+                */
+
+                string resultMessage = "";
+
+                foreach (JoinableElement je in selectedElements.Where(ec => selectedCategories.Contains(ec.category)))
                 {
                     foreach (Element f in je.canJoinWith)
                     {
-                        if (JoinableElement.uniqueCategories.Exists(c => c.Id == je.category.Id) &&
-                            JoinableElement.uniqueCategories.Exists(c => c.Id == f.Category.Id))
+                        if (!JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
                         {
-                            if (je.elementId != f.Id)
+                            if (je.canBeJoined)
                             {
-                                if (selectedElementIds.Contains(f.Id))
+                                try
                                 {
-                                    if (!JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
-                                    {
-                                        try
-                                        {
-                                            JoinGeometryUtils.JoinGeometry(doc, f, je.element);
-
-                                        }
-                                        catch{ }                                    }
+                                    JoinGeometryUtils.JoinGeometry(doc, je.element, f);
+                                }
+                                catch
+                                {
+                                    resultMessage += (je.elementId + " <=> " + f.Name + "\n");
                                 }
                             }
-
                         }
+
                     }
                 }
+
+                TaskDialog.Show("Results", resultMessage);
+
                 tx.Commit();
+                Close();
             }
 
         }
 
         private void btn_Cancel_Click(object sender, EventArgs e)
         {
+            selectedElements.Clear();
+            selectedCategories.Clear();
             Close();
         }
     }

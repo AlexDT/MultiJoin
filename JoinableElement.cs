@@ -23,13 +23,10 @@ namespace MultiJoin
         internal string name { get; }
         internal Category category { get; }
         internal BoundingBoxXYZ boundingBox { get; }
-        internal XYZ boundingBoxMin { get; }
-        internal XYZ boundingBoxMax { get; }
         internal Outline boundingBoxOutline { get; }
-        internal BoundingBoxIntersectsFilter boundingBoxFilter { get; set; }
+        internal BoundingBoxIntersectsFilter boundingBoxFilter { get; }
         internal bool canBeJoined { get; set; }
-        internal List<Element> canJoinWith { get; set; }
-        //internal FilteredElementCollector collector { get; set; }
+        internal List<Element> canJoinWith { get; }
         #endregion
 
         public JoinableElement(ElementId eId)
@@ -38,19 +35,21 @@ namespace MultiJoin
             element = doc.GetElement(elementId);
             name = element.Name;
             category = element.Category;
-            canBeJoined = true;
+            canBeJoined = false;
             boundingBox = element.get_BoundingBox(doc.ActiveView);
             XYZ boundingBoxMin = boundingBox.Min;
             XYZ boundingBoxMax = boundingBox.Max;
             boundingBoxOutline = new Outline(boundingBoxMin, boundingBoxMax);
             boundingBoxFilter = new BoundingBoxIntersectsFilter(boundingBoxOutline, 100);
-            canJoinWith = new FilteredElementCollector(doc, doc.ActiveView.Id).WherePasses(boundingBoxFilter).ToList();
-
-            addCategory(element.Category);
-            addJoinable(element);
+            canJoinWith = new FilteredElementCollector(doc, doc.ActiveView.Id)
+                .WherePasses(boundingBoxFilter)
+                .Where(e => selectedElementIds.Contains(e.Id))
+                .ToList();
+            addCategory(category);
+            joinQualifier(element);
             counter += 1;
 
-            Debug.WriteLine(name + ": " + elementId + " - " + category.Name);
+            //Debug.WriteLine(name + ": " + elementId + " - " + category.Name);
 
         }
         private void addCategory(Category cat)
@@ -60,11 +59,14 @@ namespace MultiJoin
                 uniqueCategories.Add(cat);
             }
         }
-        private void addJoinable(Element ele)
+        private void joinQualifier(Element ele)
         {
-            if (canBeJoined)
+            if (category.Name == "Structural Framing")
             {
-                canJoinWith.Add(ele);
+                canBeJoined = true;
+            } else
+            {
+                canBeJoined = false;
             }
         }
     }
