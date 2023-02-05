@@ -1,23 +1,15 @@
 ﻿#region Namespaces
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RHDRevitLib.Utils;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static MultiJoin.Command;
-using Application = Autodesk.Revit.ApplicationServices.Application;
-using Form = System.Windows.Forms.Form;
-using View = Autodesk.Revit.DB.View;
 using System.Diagnostics;
+using System.Linq;
+
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+
+using static MultiJoin.Command;
+
+using Form = System.Windows.Forms.Form;
 #endregion
 
 
@@ -75,27 +67,26 @@ namespace MultiJoin
 
                 string resultMessage = "";
 
-                foreach (JoinableElement je in selectedElements/*.Where(ec => selectedCategories.Contains(ec.category))*/)
+                foreach (JoinableElement joinableElement in selectedElements/*.Where(ec => selectedCategories.Contains(ec.category))*/)
                 {
-                    if (je.canBeJoined &&
-                        selectedCategories.Exists(c => c.Id == je.category.Id))
-                    {
-                        foreach (Element f in je.canJoinWith)
-                        {
-                            if (selectedCategories.Exists(c => c.Id == f.Category.Id) &&
-                                !JoinGeometryUtils.AreElementsJoined(doc, je.element, f))
-                            {
-                                try
-                                {
-                                    JoinGeometryUtils.JoinGeometry(doc, je.element, f);
-                                }
-                                catch
-                                {
-                                    resultMessage += (je.name + "." + " <=> " + f.Name + "." + "\n");
-                                }
-                            }
-                        }
+                    if (!joinableElement.canBeJoined ||
+                        !selectedCategories.Exists(c => c.Id == joinableElement.category.Id))
+                    { continue; }
 
+                    foreach (Element element in joinableElement.canJoinWith)
+                    {
+                        if (!selectedCategories.Exists(c => c.Id == element.Category.Id) ||
+                            !JoinGeometryUtils.AreElementsJoined(doc, joinableElement.element, element))
+                        { continue; }
+
+                        try
+                        {
+                            JoinGeometryUtils.JoinGeometry(doc, joinableElement.element, element);
+                        }
+                        catch
+                        {
+                            resultMessage += (joinableElement.name + "." + " <=> " + element.Name + "." + "\n");
+                        }
                     }
                 }
 

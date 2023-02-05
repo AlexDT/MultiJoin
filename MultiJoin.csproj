@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MultiJoin</RootNamespace>
     <AssemblyName>MultiJoin</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -52,7 +52,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="RHDRevitLib">
-      <HintPath>..\..\..\..\..\ProgramData\RHDHV_RevitTools\Library\RHDRevitLib.dll</HintPath>
+      <HintPath>C:\RHDHV\A-04_Technology\06_Revit_Add-ins\RHD_Plugins\2020\RHDRevitLib\RHDRevitLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

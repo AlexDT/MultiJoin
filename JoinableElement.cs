@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Autodesk.Revit.DB;
-using System.Diagnostics;
 
 using static MultiJoin.Command;
 
@@ -35,18 +32,24 @@ namespace MultiJoin
             element = doc.GetElement(elementId);
             name = element.Name;
             category = element.Category;
+
             canBeJoined = false;
+
             boundingBox = element.get_BoundingBox(doc.ActiveView);
             XYZ boundingBoxMin = boundingBox.Min;
             XYZ boundingBoxMax = boundingBox.Max;
+
             boundingBoxOutline = new Outline(boundingBoxMin, boundingBoxMax);
             boundingBoxFilter = new BoundingBoxIntersectsFilter(boundingBoxOutline, 0);
+
             canJoinWith = new FilteredElementCollector(doc, doc.ActiveView.Id)
                 .WherePasses(boundingBoxFilter)
                 .Where(e => selectedElementIds.Contains(e.Id))
                 .ToList();
+
             addCategory(category);
             joinQualifier(element);
+
             counter += 1;
 
             //Debug.WriteLine(name + ": " + elementId + " - " + category.Name);
@@ -59,12 +62,14 @@ namespace MultiJoin
                 uniqueCategories.Add(cat);
             }
         }
+
         private void joinQualifier(Element ele)
         {
             if (category.Name == "Structural Framing")
             {
                 canBeJoined = true;
-            } else
+            }
+            else
             {
                 canBeJoined = false;
             }
