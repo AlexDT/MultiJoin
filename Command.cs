@@ -15,31 +15,6 @@ using static MultiJoin.GroupUtil;
 
 #endregion
 
-/* SUMMARY ADD-IN
- 
-> . . . . .
-> . . . . .
-
-*/
-
-
-/* TODO:
- 
-> . . . . .
-> . . . . .
-
-*/
-
-/* VERSIONS 
-
-Version 0.0.1
-+ . . . . . .
-
-Version 0.0.2
-+ . . . . . .
-
-*/
-
 namespace MultiJoin
 {
     [Transaction(TransactionMode.Manual)]
